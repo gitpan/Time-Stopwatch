@@ -10,12 +10,6 @@ BEGIN { $| = 1; print "1..8\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Time::Stopwatch;
 $loaded = 1;
-print <<"NOTE" unless Time::Stopwatch::HIRES;
-
- ! As Time::HiRes could not be loaded, resolution will be !
- ! limited to one second.  Some tests will be skipped.    !
-
-NOTE
 print "ok 1\n";
 
 ######################### End of black magic.
@@ -24,31 +18,46 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
+print <<"NOTE" unless Time::Stopwatch::HIRES;
+
+ ! As Time::HiRes could not be loaded, resolution will be !
+ ! limited to one second.  Some tests will be skipped.    !
+
+NOTE
+
 # Does the timer work at all?
 test2: {
     tie my $timer, 'Time::Stopwatch';
     my $start = $timer;
     sleep(1);
-    print $start < $timer ? "ok" : "not ok", " 2\n";
+    my $stop = $timer;
+    print $start < $stop ? "ok" : "not ok",
+        " 2\t# $start < $stop\n";
 };
 
 # Can we supply an initial value?
 test3: {
     tie my $timer, 'Time::Stopwatch', 32;
-    print $timer >= 32 ? "ok" : "not ok", " 3\n";
+    my $stop = $timer;
+    print $stop >= 32 ? "ok" : "not ok",
+        " 3\t# $stop >= 32\n";
 };
 
 # How about assignment?
 test4: {
     tie my $timer, 'Time::Stopwatch';
     $timer = 64;
-    print $timer >= 64 ? "ok" : "not ok", " 4\n";
+    my $stop = $timer;
+    print $stop >= 64 ? "ok" : "not ok",
+        " 4\t# $stop >= 64\n";
 };
 
 # Are fractional times preserved?
 test5: {
     tie my $timer, 'Time::Stopwatch', 2.5;
-    print $timer != int($timer) ? "ok" : "not ok", " 5\n";
+    my $stop = $timer;
+    print $stop != int($stop) ? "ok" : "not ok",
+        " 5\t# $stop != ${\int($stop)}\n";
 };
 
 # Can we do real fractional timing?
@@ -57,23 +66,29 @@ test6: {
 	and next unless Time::Stopwatch::HIRES;
     tie my $timer, 'Time::Stopwatch', 1;
     select(undef,undef,undef,0.25);
-    print $timer != int($timer) ? "ok" : "not ok", " 6\n";
+    my $stop = $timer;
+    print $stop != int($stop) ? "ok" : "not ok",
+        " 6\t# $stop != ${\int($stop)}\n";
 };
 
 # Is it accurate to one second?
 test7: {
     tie my $timer, 'Time::Stopwatch', 2;
     sleep(2);
-    print int($timer+.5) == 4 ? "ok" : "not ok", " 7\n";
+    my $stop = $timer;
+    print int($stop+.5) == 4 ? "ok" : "not ok",
+        " 7\t# 3.5 <= $stop < 4.5\n";
 };
 
-# Is it accurate to 1/100 seconds?
+# Is it accurate to 1/10 seconds?
 test8: {
     print "ok 8\t# skipped, no Time::HiRes\n"
         and next unless Time::Stopwatch::HIRES;
     tie my $timer, 'Time::Stopwatch';
-    select(undef,undef,undef,1.28);
-    print int(100*$timer+.5) == 128 ? "ok" : "not ok", " 8\n";
+    select(undef,undef,undef,1.3);
+    my $stop = $timer;
+    print int(10*$stop+.5) == 13 ? "ok" : "not ok",
+        " 8\t# 1.25 <= $stop < 1.35\n";
 };
 
 __END__

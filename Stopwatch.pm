@@ -1,5 +1,5 @@
 package Time::Stopwatch;
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 # POD documentation after __END__ below
 
@@ -30,9 +30,11 @@ Time::Stopwatch - Use tied scalars as timers
     do_something();
     print "Did something in $timer seconds.\n";
 
-    $timer = 0;
-    do_something_else();
-    print "Did something else in $timer seconds.\n";
+    my @times = map {
+        $timer = 0;
+        do_something_else();
+        $timer;
+    } 1 .. 5;
 
 =head1 DESCRIPTION
 
@@ -50,6 +52,18 @@ C<Time::Stopwatch> will automatically count fractional seconds.  Do
 I<not> assume that the values of the timers are always integers.  You
 may test the constant C<Time::Stopwatch::HIRES> to find out whether
 high resolution timing is enabled.
+
+=head1 CHANGE LOG
+
+=over 4
+
+=item 0.03 (27 Feb 2001)
+
+Modified tests to give more information, reduced subsecond accuracy
+test to 1/10 seconds to allow for inaccurate select() implementations.
+Tweaked synopsis and README.
+
+=back
 
 =head1 SEE ALSO
 
