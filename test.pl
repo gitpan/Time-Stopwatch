@@ -6,7 +6,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..8\n"; }
+BEGIN { $| = 1; print "1..9\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Time::Stopwatch;
 $loaded = 1;
@@ -89,6 +89,18 @@ test8: {
     my $stop = $timer;
     print int(10*$stop+.5) == 13 ? "ok" : "not ok",
         " 8\t# 1.25 <= $stop < 1.35\n";
+};
+
+# Does $t++ really make the timer lag?
+test9: {
+    print "ok 9\t# skipped, no Time::HiRes\n"
+        and next unless Time::Stopwatch::HIRES;
+    tie my $timer, 'Time::Stopwatch';
+    tie my $delay, 'Time::Stopwatch';
+    while ($delay < 1) { $timer++; $timer--; }
+    my $stop = $timer;
+    print $stop < 1 ? "ok" : "not ok",
+        " 9\t# $stop < 1 (confirms known bug)\n";
 };
 
 __END__
